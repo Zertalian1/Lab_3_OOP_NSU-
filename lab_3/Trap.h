@@ -6,9 +6,10 @@
 class Trap
 {
 private:
-    std::string M_F_name;     //  урон ловушки
+    int M_F_name;     //  урон ловушки
 
 public:
-    Trap(const std::string& name);   
+    Trap(const int name);  
+    const int& get_voice() { return M_F_name; }
 };
 #endif //TRAP_H  

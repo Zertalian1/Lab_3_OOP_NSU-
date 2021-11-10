@@ -1,7 +1,7 @@
 #include "Trap.h"
 
 
-Trap::Trap(const std::string& name)
+Trap::Trap(const int name)
 {
 	M_F_name = name;
 }

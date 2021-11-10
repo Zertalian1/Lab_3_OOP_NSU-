@@ -1,7 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include "Game_eng.h"
 #include <map>
 #include "Trap.h"
+
+#include <Mmsystem.h>
+#include <mciapi.h>
+//these two headers are already included in the <Windows.h> header
+#pragma comment(lib, "Winmm.lib")
 
 using namespace std;
 
@@ -10,10 +16,9 @@ using namespace std;
 
 int main()
 {
-	//std::map<std::pair<int, int>, Trap> traps;
-	//traps.insert(pair<char, int>('a', 10));
-	//Trap trap1(10);
-	//traps[std::make_pair(0, 0)] = trap1;
+	wchar_t* wc = new wchar_t[30];
+	wsprintf(wc, TEXT("play Welcome.mp3"));
+	mciSendString(wc, NULL, 0, NULL);
 	string map_name="Map1";
 	Game_engen game;
 	while (1) {

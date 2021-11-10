@@ -4,14 +4,15 @@
 bool parseTrap(const string& trapfile, map<std::pair<int, int>, shared_ptr<Trap>>& traps) {
 	ifstream fis(trapfile);
 	string tmp0;
-	unsigned int X, Y;
+	unsigned int X, Y, num;
 	while (!fis.eof() && fis.is_open()) {
 		fis >> tmp0;
 		X = stoi(tmp0);
 		fis >> tmp0;
 		Y = stoi(tmp0);
 		fis >> tmp0;
-		traps[std::make_pair(X, Y)] = make_shared<Trap>(tmp0);
+		num = stoi(tmp0);
+		traps[std::make_pair(X, Y)] = make_shared<Trap>(num);
 	}
 	return 1;
 }
@@ -85,7 +86,12 @@ void Game_engen::Game_eng()
 		if (!player.Move(ElapsedTime, map_)) {
 				break;
 		}
-		if (traps.find(std::make_pair((int)player.get_X(), (int)player.get_Y())) != traps.end()) {
+		auto itr = traps.find(std::make_pair((int)player.get_X(), (int)player.get_Y()));
+		if (itr  != traps.end()) {
+			wchar_t* wc = new wchar_t[30];
+			int voice = (itr->second)->get_voice();
+			wsprintf(wc, TEXT("play Trap%d.mp3"), voice);
+			mciSendString(wc, NULL, 0, NULL);
 			player.set_X(Start_X);
 			player.set_Y(Start_Y);
 		}
