@@ -16,9 +16,9 @@ using namespace std;
 
 int main()
 {
-	wchar_t* wc = new wchar_t[30];
+	/*wchar_t* wc = new wchar_t[30];
 	wsprintf(wc, TEXT("play Welcome.mp3"));
-	mciSendString(wc, NULL, 0, NULL);
+	mciSendString(wc, NULL, 0, NULL);*/
 	string map_name="Map1";
 	Game_engen game;
 	while (1) {
@@ -27,9 +27,11 @@ int main()
 			map_name=game.Map_menu();
 		}
 		else {
-			Game_engen game1(map_name);
-			game = game1;
-			break;
+			if (map_name != "error") {
+				Game_engen game1(map_name);
+				game = game1;
+				break;
+			}
 		}
 	}
 	
