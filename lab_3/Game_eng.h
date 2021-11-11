@@ -1,3 +1,5 @@
+#ifndef GAME_E_H
+#define GAME_E_H
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -29,3 +31,4 @@ private:
 	float Start_X;
 	float Start_Y;
 };
+#endif //GAME_E_H

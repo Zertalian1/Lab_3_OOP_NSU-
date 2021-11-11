@@ -1,9 +1,8 @@
+#ifndef PER_H
+#define PER_H
 #include "Map.h"
 class Person
 {
-private:
-    
-
 public:
     virtual bool Move(const float& ElapsedTime, Map& map) = 0;   
     float PlayerX;      //  коорд. Y
@@ -13,3 +12,5 @@ public:
     float FOF_View;     //  угол поля зрения
     float MRend_dist;   //  дистанция взгляда
 };
+
+#endif //PER_H

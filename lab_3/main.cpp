@@ -16,6 +16,8 @@ using namespace std;
 
 int main()
 {
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(664489);
 	/*wchar_t* wc = new wchar_t[30];
 	wsprintf(wc, TEXT("play Welcome.mp3"));
 	mciSendString(wc, NULL, 0, NULL);*/

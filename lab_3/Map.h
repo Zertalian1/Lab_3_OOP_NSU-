@@ -1,3 +1,5 @@
+#ifndef MAP_H
+#define MAP_H
 #include <string>
 #include <fstream>
 #include <string>
@@ -33,5 +35,6 @@ private:
 	std::string Map_name;
 	std::string maps;
 };
+#endif //MAP_H
 
 

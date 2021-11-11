@@ -28,6 +28,105 @@ Game_engen::Game_engen(const string& map_name)
 	parseTrap(map_name+"Trap.txt", traps);
 }
 
+bool get_choise(short* choise, size_t size) {
+	Sleep(90);
+	if (GetAsyncKeyState((unsigned short)'W') & 0x8000) {
+		if (*choise == 0)
+			*choise = size;
+		(*choise)--;
+	}
+	if (GetAsyncKeyState((unsigned short)'S') & 0x8000) {
+		if (*choise == size-1)
+			*choise = -1;
+		(*choise)++;
+	}
+	if (GetAsyncKeyState(13) & 0x8000) {
+		return 0;	
+	}
+	return 1;
+}
+
+void send_rays(bool* bBoundary, Player& player, Map& map_, float* fDistanceToWall, float& fRayAngle) {
+	bool bHitWall = false;
+	float fStepSize = 0.1f;
+	float fEyeX = sinf(fRayAngle); // Unit vector for ray in player space
+	float fEyeY = cosf(fRayAngle);
+	while (!bHitWall && *fDistanceToWall < player.get_Depth())
+	{
+		(*fDistanceToWall) += fStepSize;
+		int nTestX = (int)(player.get_X() + fEyeX * *fDistanceToWall);
+		int nTestY = (int)(player.get_Y() + fEyeY * *fDistanceToWall);
+
+		// Test if ray is out of bounds
+		if (nTestX < 0 || nTestX >= map_.get_MapWidth() || nTestY < 0 || nTestY >= map_.get_MapHeight())
+		{
+			bHitWall = true;			// Just set distance to maximum depth
+			*fDistanceToWall = player.get_Depth();
+		}
+		else
+		{
+			// Ray is inbounds so test to see if the ray cell is a wall block
+			if (map_.get_map().c_str()[nTestX * map_.get_MapWidth() + nTestY] == '#')
+			{
+
+				bHitWall = true;
+
+				vector<pair<float, float>> p;
+
+				for (int tx = 0; tx < 2; tx++)
+					for (int ty = 0; ty < 2; ty++)
+					{
+
+						float vy = (float)nTestY + ty - player.get_Y();
+						float vx = (float)nTestX + tx - player.get_X();
+						float d = sqrt(vx * vx + vy * vy);
+						float dot = (fEyeX * vx / d) + (fEyeY * vy / d);
+						p.push_back(make_pair(d, dot));
+					}
+
+
+				sort(p.begin(), p.end(), [](const pair<float, float>& left, const pair<float, float>& right) {return left.first < right.first; });
+
+				float fBound = 0.005;
+				if (acos(p.at(0).second) < fBound) *bBoundary = true;
+				if (acos(p.at(1).second) < fBound) *bBoundary = true;
+				if (acos(p.at(2).second) < fBound) *bBoundary = true;
+			}
+		}
+	}
+}
+
+void shader_walls(Player& player, Map& map_,int& x,int& nCeiling, int& nFloor, float& fDistanceToWall, bool& bBoundary, wchar_t* screen) {
+	short nShade = ' ';
+	if (fDistanceToWall <= player.get_Depth() / 4.0f)			nShade = 0x2588;	// Very close
+	else if (fDistanceToWall < player.get_Depth() / 3.0f)		nShade = 0x2593;
+	else if (fDistanceToWall < player.get_Depth() / 2.0f)		nShade = 0x2592;
+	else if (fDistanceToWall < player.get_Depth())				nShade = 0x2591;
+	else											nShade = ' ';		// Too far away
+
+	if (bBoundary)		nShade = ' '; // Black it out
+
+	for (int y = 0; y < map_.get_ScreenHeight(); y++)
+	{
+		// Each Row
+		if (y <= nCeiling)
+			screen[y * map_.get_ScreenWidth() + x] = ' ';
+		else if (y > nCeiling && y <= nFloor)
+			screen[y * map_.get_ScreenWidth() + x] = nShade;
+		else // Floor
+		{
+			// Shade floor based on distance
+			float b = 1.0f - (((float)y - map_.get_ScreenHeight() / 2.0f) / ((float)map_.get_ScreenHeight() / 2.0f));
+			if (b < 0.25)		nShade = '#';
+			else if (b < 0.5)	nShade = 'x';
+			else if (b < 0.75)	nShade = '.';
+			else if (b < 0.9)	nShade = '-';
+			else				nShade = ' ';
+			screen[y * map_.get_ScreenWidth() + x] = nShade;
+		}
+	}
+}
+
 bool Game_engen::Main_menu()
 {
 	int ScreenWidth = 120, ScreenHeight = 40;
@@ -37,23 +136,11 @@ bool Game_engen::Main_menu()
 	DWORD dwBytesWritten = 0;
 	short choise=0;
 	while (true) {
-		Sleep(90);
-		if (GetAsyncKeyState((unsigned short)'W') & 0x8000) {
-			if (choise == 0)
-				choise = 2;
-			choise--;
-		}
-		if (GetAsyncKeyState((unsigned short)'S') & 0x8000) {
-			if (choise == 1)
-				choise = -1;
-			choise++;
-		}
-		if (GetAsyncKeyState(13) & 0x8000) {
+		if (!get_choise(&choise, 2)) {
 			if (choise == 0)
 				return 0;
 			return 1;
 		}
-
 		for (int nx = 0; nx < ScreenWidth; nx++)
 			for (int ny = 0; ny < ScreenHeight; ny++)
 			{
@@ -97,94 +184,18 @@ void Game_engen::Game_eng()
 		{
 			// For each column, calculate the projected ray angle into world space
 			float fRayAngle = (player.get_A() - player.get_FOV() / 2.0f) + ((float)x / (float)map_.get_ScreenWidth()) * player.get_FOV();
-
-			// Find distance to wall
-			float fStepSize = 0.1f;		  // Increment size for ray casting, decrease to increase
+			
 			float fDistanceToWall = 0.0f; //                                      resolution
 
-			bool bHitWall = false;		// Set when ray hits wall block
+			//bool bHitWall = false;		// Set when ray hits wall block
 			bool bBoundary = false;		// Set when ray hits boundary between two wall blocks
 
-			float fEyeX = sinf(fRayAngle); // Unit vector for ray in player space
-			float fEyeY = cosf(fRayAngle);
-
-			while (!bHitWall && fDistanceToWall < player.get_Depth())
-			{
-				fDistanceToWall += fStepSize;
-				int nTestX = (int)(player.get_X() + fEyeX * fDistanceToWall);
-				int nTestY = (int)(player.get_Y() + fEyeY * fDistanceToWall);
-
-				// Test if ray is out of bounds
-				if (nTestX < 0 || nTestX >= map_.get_MapWidth() || nTestY < 0 || nTestY >= map_.get_MapHeight())
-				{
-					bHitWall = true;			// Just set distance to maximum depth
-					fDistanceToWall = player.get_Depth();
-				}
-				else
-				{
-					// Ray is inbounds so test to see if the ray cell is a wall block
-					if (map_.get_map().c_str()[nTestX * map_.get_MapWidth() + nTestY] == '#')
-					{
-
-						bHitWall = true;
-
-						vector<pair<float, float>> p;
-
-						for (int tx = 0; tx < 2; tx++)
-							for (int ty = 0; ty < 2; ty++)
-							{
-
-								float vy = (float)nTestY + ty - player.get_Y();
-								float vx = (float)nTestX + tx - player.get_X();
-								float d = sqrt(vx * vx + vy * vy);
-								float dot = (fEyeX * vx / d) + (fEyeY * vy / d);
-								p.push_back(make_pair(d, dot));
-							}
-
-
-						sort(p.begin(), p.end(), [](const pair<float, float>& left, const pair<float, float>& right) {return left.first < right.first; });
-
-						float fBound = 0.005;
-						if (acos(p.at(0).second) < fBound) bBoundary = true;
-						if (acos(p.at(1).second) < fBound) bBoundary = true;
-						if (acos(p.at(2).second) < fBound) bBoundary = true;
-					}
-				}
-			}
-
+			send_rays(&bBoundary, player, map_, &fDistanceToWall, fRayAngle);
 			// Calculate distance to ceiling and floor
 			int nCeiling = (float)(map_.get_ScreenHeight() / 2.0) - map_.get_ScreenHeight() / ((float)fDistanceToWall);
 			int nFloor = map_.get_ScreenHeight() - nCeiling;
 
-			// Shader walls based on distance
-			short nShade = ' ';
-			if (fDistanceToWall <= player.get_Depth() / 4.0f)			nShade = 0x2588;	// Very close
-			else if (fDistanceToWall < player.get_Depth() / 3.0f)		nShade = 0x2593;
-			else if (fDistanceToWall < player.get_Depth() / 2.0f)		nShade = 0x2592;
-			else if (fDistanceToWall < player.get_Depth())				nShade = 0x2591;
-			else											nShade = ' ';		// Too far away
-
-			if (bBoundary)		nShade = ' '; // Black it out
-
-			for (int y = 0; y < map_.get_ScreenHeight(); y++)
-			{
-				// Each Row
-				if (y <= nCeiling)
-					screen[y * map_.get_ScreenWidth() + x] = ' ';
-				else if (y > nCeiling && y <= nFloor)
-					screen[y * map_.get_ScreenWidth() + x] = nShade;
-				else // Floor
-				{
-					// Shade floor based on distance
-					float b = 1.0f - (((float)y - map_.get_ScreenHeight() / 2.0f) / ((float)map_.get_ScreenHeight() / 2.0f));
-					if (b < 0.25)		nShade = '#';
-					else if (b < 0.5)	nShade = 'x';
-					else if (b < 0.75)	nShade = '.';
-					else if (b < 0.9)	nShade = '-';
-					else				nShade = ' ';
-					screen[y * map_.get_ScreenWidth() + x] = nShade;
-				}
-			}
+			shader_walls(player, map_, x, nCeiling, nFloor, fDistanceToWall, bBoundary, screen);
 		}
 
 		// Display Stats
@@ -214,24 +225,11 @@ bool Game_engen::Esc_menu()
 	DWORD dwBytesWritten1 = 0;
 	short choise = 0;
 	while (true) {
-		Sleep(90);
-		if (GetAsyncKeyState((unsigned short)'W') & 0x8000) {
-			if (choise == 0)
-				choise = 2;
-			choise--;
-		}
-		if (GetAsyncKeyState((unsigned short)'S') & 0x8000) {
-			if (choise == 1)
-				choise = -1;
-			choise++;
-		}
-		if (GetAsyncKeyState(13) & 0x8000) {
+		if (!get_choise(&choise, 2)) {
 			if (choise == 0)
 				return 0;
 			return 1;
 		}
-
-
 		for (int nx = 0; nx < ScreenWidth; nx++)
 			for (int ny = 0; ny < ScreenHeight; ny++)
 			{
@@ -253,10 +251,6 @@ string Game_engen::Map_menu()
 	DWORD dwBytesWritten1 = 0;
 	short choise = 0;
 	vector <string> maps;
-	//maps.push_back("Map1.txt");
-	//maps.push_back("Map2.txt");
-	//maps.push_back("Map3.txt");
-
 	std::ifstream fis("map_names.txt");
 	std::string line;
 	if (!fis)
@@ -269,24 +263,12 @@ string Game_engen::Map_menu()
 	fis.close();
 
 	while (true) {
-		Sleep(90);
-		if (GetAsyncKeyState((unsigned short)'W') & 0x8000) {
-			if (choise == 0)
-				choise = maps.size();
-			choise--;
-		}
-		if (GetAsyncKeyState((unsigned short)'S') & 0x8000) {
-			if (choise == maps.size()-1)
-				choise = -1;
-			choise++;
+		if (!get_choise(&choise, maps.size())) {
+			return maps.at(choise);
 		}
 		if (GetAsyncKeyState(27) & 0x8000) {
 			return "error";
 		}
-		if (GetAsyncKeyState(13) & 0x8000) {
-			return  maps.at(choise);
-		}
-
 
 		for (int nx = 0; nx < ScreenWidth; nx++)
 			for (int ny = 0; ny < ScreenHeight; ny++)

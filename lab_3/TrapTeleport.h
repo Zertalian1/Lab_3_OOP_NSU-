@@ -1,5 +1,5 @@
-#ifndef TRAP_H
-#define TRAP_H
+#ifndef TRAP_T_H
+#define TRAP_T_H
 #include <string>
 #include "Trap.h"
 
@@ -13,4 +13,4 @@ public:
     TrapTeleport(const int name);
     bool Trap_work() override;
 };
-#endif //TRAP_H  
+#endif //TRAP_T_H  
