@@ -13,10 +13,6 @@ Player::Player(const float& x, const float& y, const float& A,const float& view,
     MRend_dist = dist;
 }
 
-/*void Player::Damage(const int& getting_d)
-{
-    Health -= getting_d;
-}*/
 
 bool Player::Move(const float& ElapsedTime, Map& map)
 {

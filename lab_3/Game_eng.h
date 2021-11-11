@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <chrono>
 #include "Player.h"
-#include "Trap.h"
+#include "TrapTeleport.h"
 #include <map> 
 using namespace std;
 
@@ -25,7 +25,7 @@ public:
 private:
 	Player player;
 	Map map_;
-	map<std::pair<int, int>, shared_ptr<Trap>> traps;
+	map<std::pair<int, int>, shared_ptr<TrapTeleport>> traps;
 	float Start_X;
 	float Start_Y;
 };

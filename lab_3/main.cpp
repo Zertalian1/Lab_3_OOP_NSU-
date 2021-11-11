@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Game_eng.h"
 #include <map>
-#include "Trap.h"
+#include "TrapTeleport.h"
 
 #include <Mmsystem.h>
 #include <mciapi.h>

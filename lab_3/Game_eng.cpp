@@ -1,7 +1,7 @@
 #include "Game_eng.h"
 #include <map>
 
-bool parseTrap(const string& trapfile, map<std::pair<int, int>, shared_ptr<Trap>>& traps) {
+bool parseTrap(const string& trapfile, map<std::pair<int, int>, shared_ptr<TrapTeleport>>& traps) {
 	ifstream fis(trapfile);
 	string tmp0;
 	unsigned int X, Y, num;
@@ -12,7 +12,7 @@ bool parseTrap(const string& trapfile, map<std::pair<int, int>, shared_ptr<Trap>
 		Y = stoi(tmp0);
 		fis >> tmp0;
 		num = stoi(tmp0);
-		traps[std::make_pair(X, Y)] = make_shared<Trap>(num);
+		traps[std::make_pair(X, Y)] = make_shared<TrapTeleport>(num);
 	}
 	return 1;
 }
@@ -88,10 +88,7 @@ void Game_engen::Game_eng()
 		}
 		auto itr = traps.find(std::make_pair((int)player.get_X(), (int)player.get_Y()));
 		if (itr  != traps.end()) {
-			wchar_t* wc = new wchar_t[30];
-			int voice = (itr->second)->get_voice();
-			wsprintf(wc, TEXT("play Trap%d.mp3"), voice);
-			mciSendString(wc, NULL, 0, NULL);
+			int voice = (itr->second)->Trap_work();
 			player.set_X(Start_X);
 			player.set_Y(Start_Y);
 		}

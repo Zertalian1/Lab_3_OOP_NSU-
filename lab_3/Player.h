@@ -10,23 +10,14 @@ using namespace std;
 
 #include <stdio.h>
 #include <Windows.h>
-#include "Map.h"
+#include "Person.h"
 
-class Player
+class Player : public Person
 {
-private:
-    float PlayerX;      //  коорд. Y
-    float PlayerY;      //  коорд. X
-    float PlayerA;      //  направление взгляда
-    float Speed;        //  скорость передвижения
-    float FOF_View;     //  угол поля зрения
-    float MRend_dist;   //  дистанция взгляда
-
 public:
     Player() {}
     Player(const float& x,const float& y,const float& A,const float& spead,const float& view,const float& dist); // добавить const type &
-    //void Damage(const int& getting_d);      //  игрок получил урон
-    bool Move(const float& ElapsedTime, Map& map);        //  двигвться    
+    bool Move(const float& ElapsedTime, Map& map) override;        //  двигвться    
     void set_X(const float& X) { PlayerX = X; }
     void set_Y(const float& Y) { PlayerY = Y; }
     const float& get_X() { return PlayerX; }

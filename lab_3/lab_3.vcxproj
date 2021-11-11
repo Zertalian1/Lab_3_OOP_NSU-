@@ -144,20 +144,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h" />
     <ClInclude Include="Game_eng.h" />
-    <ClInclude Include="idea.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Person.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Trap.h" />
+    <ClInclude Include="TrapTeleport.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gameplay.cpp" />
     <ClCompile Include="Game_eng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Trap.cpp" />
+    <ClCompile Include="TrapTeleport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Map1.txt" />
