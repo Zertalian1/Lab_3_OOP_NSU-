@@ -11,6 +11,7 @@ public:
     float Speed;        //  скорость передвижения
     float FOF_View;     //  угол поля зрения
     float MRend_dist;   //  дистанция взгляда
+    virtual ~Person() = default;
 };
 
 #endif //PER_H

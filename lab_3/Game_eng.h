@@ -17,12 +17,11 @@ using namespace std;
 class  Game_engen
 {
 public:
-	Game_engen() {}
+	Game_engen() {};
 	Game_engen(const string& map_name);
 	bool Main_menu();
 	void Game_eng();
 	bool Esc_menu();
-	bool Save();
 	string Map_menu();
 private:
 	Player player;

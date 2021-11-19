@@ -13,6 +13,7 @@ bool TrapTeleport::Trap_work()
 	wchar_t* wc = new wchar_t[30];
 	wsprintf(wc, TEXT("play Trap%d.mp3"), M_F_name);
 	mciSendString(wc, NULL, 0, NULL);
+	delete wc;
 	return false;
 }
 
