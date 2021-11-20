@@ -28,17 +28,17 @@ Game_engen::Game_engen(const string& map_name)
 	parseTrap(map_name+"Trap.txt", traps);
 }
 
-bool get_choise(short* choise, size_t size) {
+bool get_choise(short& choise, size_t size) {
 	Sleep(90);
 	if (GetAsyncKeyState((unsigned short)'W') & 0x8000) {
-		if (*choise == 0)
-			*choise = size;
-		(*choise)--;
+		if (choise == 0)
+			choise = size;
+		(choise)--;
 	}
 	if (GetAsyncKeyState((unsigned short)'S') & 0x8000) {
-		if (*choise == size-1)
-			*choise = -1;
-		(*choise)++;
+		if (choise == size-1)
+			choise = -1;
+		(choise)++;
 	}
 	if (GetAsyncKeyState(13) & 0x8000) {
 		return 0;	
@@ -46,22 +46,22 @@ bool get_choise(short* choise, size_t size) {
 	return 1;
 }
 
-void send_rays(bool* bBoundary, Player& player, Map& map_, float* fDistanceToWall, float& fRayAngle) {
+void send_rays(bool& bBoundary, Player& player, Map& map_, float& fDistanceToWall, float& fRayAngle) {
 	bool bHitWall = false;
 	float fStepSize = 0.1f;
 	float fEyeX = sinf(fRayAngle); // Unit vector for ray in player space
 	float fEyeY = cosf(fRayAngle);
-	while (!bHitWall && *fDistanceToWall < player.get_Depth())
+	while (!bHitWall && fDistanceToWall < player.get_Depth())
 	{
-		(*fDistanceToWall) += fStepSize;
-		int nTestX = (int)(player.get_X() + fEyeX * *fDistanceToWall);
-		int nTestY = (int)(player.get_Y() + fEyeY * *fDistanceToWall);
+		(fDistanceToWall) += fStepSize;
+		int nTestX = (int)(player.get_X() + fEyeX * fDistanceToWall);
+		int nTestY = (int)(player.get_Y() + fEyeY * fDistanceToWall);
 
 		// Test if ray is out of bounds
 		if (nTestX < 0 || nTestX >= map_.get_MapWidth() || nTestY < 0 || nTestY >= map_.get_MapHeight())
 		{
 			bHitWall = true;			// Just set distance to maximum depth
-			*fDistanceToWall = player.get_Depth();
+			fDistanceToWall = player.get_Depth();
 		}
 		else
 		{
@@ -88,9 +88,9 @@ void send_rays(bool* bBoundary, Player& player, Map& map_, float* fDistanceToWal
 				sort(p.begin(), p.end(), [](const pair<float, float>& left, const pair<float, float>& right) {return left.first < right.first; });
 
 				float fBound = 0.005;
-				if (acos(p.at(0).second) < fBound) *bBoundary = true;
-				if (acos(p.at(1).second) < fBound) *bBoundary = true;
-				if (acos(p.at(2).second) < fBound) *bBoundary = true;
+				if (acos(p.at(0).second) < fBound) bBoundary = true;
+				if (acos(p.at(1).second) < fBound) bBoundary = true;
+				if (acos(p.at(2).second) < fBound) bBoundary = true;
 			}
 		}
 	}
@@ -136,7 +136,7 @@ bool Game_engen::Main_menu()
 	DWORD dwBytesWritten = 0;
 	short choise=0;
 	while (true) {
-		if (!get_choise(&choise, 2)) {
+		if (!get_choise(choise, 2)) {
 			if (choise == 0)
 				return 0;
 			return 1;
@@ -190,7 +190,7 @@ void Game_engen::Game_eng()
 			//bool bHitWall = false;		// Set when ray hits wall block
 			bool bBoundary = false;		// Set when ray hits boundary between two wall blocks
 
-			send_rays(&bBoundary, player, map_, &fDistanceToWall, fRayAngle);
+			send_rays(bBoundary, player, map_, fDistanceToWall, fRayAngle);
 			// Calculate distance to ceiling and floor
 			int nCeiling = (float)(map_.get_ScreenHeight() / 2.0) - map_.get_ScreenHeight() / ((float)fDistanceToWall);
 			int nFloor = map_.get_ScreenHeight() - nCeiling;
@@ -225,7 +225,7 @@ bool Game_engen::Esc_menu()
 	DWORD dwBytesWritten1 = 0;
 	short choise = 0;
 	while (true) {
-		if (!get_choise(&choise, 2)) {
+		if (!get_choise(choise, 2)) {
 			if (choise == 0)
 				return 0;
 			return 1;
@@ -263,7 +263,7 @@ string Game_engen::Map_menu()
 	fis.close();
 
 	while (true) {
-		if (!get_choise(&choise, maps.size())) {
+		if (!get_choise(choise, maps.size())) {
 			return maps.at(choise);
 		}
 		if (GetAsyncKeyState(27) & 0x8000) {
