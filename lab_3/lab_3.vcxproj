@@ -161,7 +161,6 @@
   <ItemGroup>
     <Text Include="Map1.txt" />
     <Text Include="Map3.txt" />
-    <Text Include="Idea.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Map2.txt" />

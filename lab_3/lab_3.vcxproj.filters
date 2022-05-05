@@ -58,9 +58,6 @@
     <Text Include="Map3.txt">
       <Filter>Файлы ресурсов</Filter>
     </Text>
-    <Text Include="Idea.txt">
-      <Filter>Файлы ресурсов</Filter>
-    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="Map2.txt">

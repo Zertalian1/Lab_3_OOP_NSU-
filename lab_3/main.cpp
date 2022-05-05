@@ -6,7 +6,6 @@
 
 #include <Mmsystem.h>
 #include <mciapi.h>
-//these two headers are already included in the <Windows.h> header
 #pragma comment(lib, "Winmm.lib")
 
 using namespace std;
@@ -16,9 +15,6 @@ using namespace std;
 
 int main()
 {
-	/*wchar_t* wc = new wchar_t[30];
-	wsprintf(wc, TEXT("play Welcome.mp3"));
-	mciSendString(wc, NULL, 0, NULL);*/
 	string map_name="Map1";
 	Game_engen game;
 	while (1) {
